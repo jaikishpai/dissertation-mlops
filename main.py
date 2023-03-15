@@ -8,7 +8,15 @@ from pydantic import BaseModel
 # Creating FastAPI instance
 from sklearn.neighbors import LocalOutlierFactor
 
-app = FastAPI()
+app = FastAPI(
+    title="Local Outlier Factor API",
+    description="API to return outliers for Energy Intensity Data 🚀",
+    version="0.0.1",
+    contact={
+        "name": "Jaikish Pai",
+        "Id": "2020SC04666"
+    }
+)
 
 
 # Creating class to define the request body
