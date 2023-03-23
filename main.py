@@ -1,10 +1,9 @@
 import pandas as pd
 from fastapi import FastAPI
 from pydantic import BaseModel
-
-# Creating FastAPI instance
 from sklearn.neighbors import LocalOutlierFactor
 
+# Creating FastAPI instance
 app = FastAPI(
     title="Local Outlier Factor API",
     description="### API for outlier detection of Energy Intensity Data 🚀 <br/>",
@@ -15,9 +14,11 @@ app = FastAPI(
     }
 )
 
+'''Creating class to define the request body
+and the type hints of each attribute
+'''
 
-# Creating class to define the request body
-# and the type hints of each attribute
+
 class request_body(BaseModel):
     portfolio_asset_id: int
     country_encoded: float
@@ -31,13 +32,25 @@ class request_body(BaseModel):
 model_name = "Local Outlier Factor Algorithm"
 version = 0.1
 
-# setting contamination factor for outlier detection model
+'''
+Contamination factor for outlier detection model.
+This was arrived on basis of the experiment during the model building
+
+'''
 contamination = 0.001
 
+features = [
+    'country',
+    'sub_region_name',
+    'development_status',
+    'property_type_code',
+    'asset_size_m2',
+    'en_int_kwh_m2'
+]
+
 model_local_outlier_factor = LocalOutlierFactor(n_neighbors=10, novelty=True, contamination=contamination)
-dataset = pd.read_csv("dataset .csv")
-dataset.drop("en_abs", inplace=True, axis=1)
-model_local_outlier_factor.fit(dataset.values)
+dataset = pd.read_csv("dataset.csv")
+model_local_outlier_factor.fit(dataset[features].values)
 
 
 @app.get('/info')
@@ -52,7 +65,6 @@ async def model_info():
 @app.post('/outliers')
 def outliers(data: request_body):
     test_data = [[
-        data.portfolio_asset_id,
         data.country_encoded,
         data.sub_region_name_encoded,
         data.development_status_encoded,
@@ -60,7 +72,7 @@ def outliers(data: request_body):
         data.asset_size_m2,
         data.en_int_kwh_m2
     ]]
-    # predict the class
+    # predict whether the input data is an outlier or not
     class_predict = model_local_outlier_factor.predict(test_data)[0]
 
     '''
